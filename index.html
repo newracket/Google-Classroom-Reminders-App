@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';">
+  <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+  <link rel="stylesheet" href="./index.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
+  <title>Google Classroom Reminders</title>
+</head>
+
+<body>
+  <div class="container">
+    <div id="classesContainer"></div>
+
+    <div id="rightSideBar">
+      <h1 class="title">Google Classroom Reminders</h1>
+      <hr style="margin: 20px 0px 20px 0px;">
+      <div class="setReminderClass">
+        <input id="reminderDate" type="datetime-local" />
+        <button id="confirmReminder">Confirm</button>
+      </div>
+      <button id="viewReminders">View Reminders</button>
+      <button id="removeReminders">Remove Reminders</button>
+    </div>
+  </div>
+
+  <div class="modal">
+    <div class="title"></div>
+    <div class="description"></div>
+  </div>
+  <script src="./renderer.js"></script>
+</body>
+
+</html>

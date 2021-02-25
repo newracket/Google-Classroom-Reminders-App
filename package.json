@@ -1,0 +1,23 @@
+{
+  "name": "google-classroom-reminders-app",
+  "version": "1.0.0",
+  "description": "An application that takes google classroom assignments and gives reminders on them. ",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "GitHub",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "^11.3.0"
+  },
+  "dependencies": {
+    "googleapis": "^67.0.0",
+    "growl": "^1.10.5",
+    "node-notifier": "^9.0.0",
+    "open": "^7.4.0",
+    "powertoast": "^1.2.3",
+    "server-destroy": "^1.0.1",
+    "sqlite3": "^5.0.2"
+  }
+}
