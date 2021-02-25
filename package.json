@@ -15,7 +15,7 @@
     "googleapis": "^67.0.0",
     "growl": "^1.10.5",
     "node-notifier": "^9.0.0",
-    "open": "^7.4.0",
+    "open": "^7.4.2",
     "powertoast": "^1.2.3",
     "server-destroy": "^1.0.1",
     "sqlite3": "^5.0.2"
