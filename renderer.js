@@ -1,9 +1,7 @@
 const classroom = require("./classroom");
-const fs = require("fs");
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('reminders.db');
 const notifier = require("node-notifier");
-const { container } = require("googleapis/build/src/apis/container");
 
 const sortedWork = {};
 const monthDictionary = { "January": "Jan", "February": "Feb", "March": "Mar", "April": "Apr", "May": "May", "June": "Jun", "July": "Jul", "August": "Aug", "September": "Sep", "October": "Oct", "November": "Nov", "December": "Dec" }
@@ -52,27 +50,32 @@ db.serialize(() => {
         if (new Date(row.date) < new Date()) {
           if (row.timesReminded % 1 == 0) {
             const assignment = classworkJSON.find(e => e.title == row.reminder);
-            
-            const dueDate = new Date(assignment.dueDate.year, assignment.dueDate.month - 1, assignment.dueDate.day, assignment.dueTime.hours - 8, assignment.dueTime.minutes);
 
-            notifier.notify({
-              title: `Reminder for ${row.class}`,
-              message: `Reminder to do the assignment ${row.reminder}\nDue on ${dueDate.toString().split(" GM")[0]}`,
-              icon: "./googleclassroomicon.png",
-              wait: true,
-              sound: true
-            });
-
-            notifier.on('click', function (notifierObject, options, event) {
+            if (assignment == undefined) {
               db.run(`DELETE FROM reminders WHERE date="${row.date}"`);
-            });
+            }
+            else {
+              const dueDate = new Date(assignment.dueDate.year, assignment.dueDate.month - 1, assignment.dueDate.day, assignment.dueTime.hours - 8, assignment.dueTime.minutes);
+
+              notifier.notify({
+                title: `Reminder for ${row.class}`,
+                message: `Reminder to do the assignment ${row.reminder}\nDue on ${dueDate.toString().split(" GM")[0]}`,
+                icon: "./googleclassroomicon.png",
+                wait: true,
+                sound: true
+              });
+
+              notifier.on('click', function (notifierObject, options, event) {
+                db.run(`DELETE FROM reminders WHERE date="${row.date}"`);
+              });
+            }
           }
 
           db.run(`UPDATE reminders SET timesReminded=${row.timesReminded + 1} WHERE date="${row.date}"`);
         }
       });
     });
-  }, 3000/*00*/);
+  }, 300000);
 });
 
 function updateClasswork(classworkJSON) {
