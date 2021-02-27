@@ -12,70 +12,70 @@ const dayDictionary = { "Sunday": "Sun", "Monday": "Mon", "Tuesday": "Tue", "Wed
 //   .then(client => classroom.runSample(client).then(() => updateClasswork(classroom.showWork())))
 //   .catch(console.error);
 
-document.getElementById("confirmReminder").addEventListener("click", function () {
+document.getElementById("confirmReminder").addEventListener("click", () => {
   const reminderDate = document.getElementById("reminderDate").value;
   const remindersToAdd = [...document.querySelectorAll("input[type='checkbox'")].filter(checkbox => checkbox.checked);
 
   remindersToAdd.forEach(reminderToAdd => {
-    db.run(`INSERT INTO reminders (date, reminder, class) VALUES ("${reminderDate}", "${reminderToAdd.getAttribute("data-reminderContent")}", "${reminderToAdd.getAttribute("data-reminderClass")}")`, function (err) {
-      if (err) {
-        return console.log(err.message);
-      }
-    });
-
+    addReminder(reminderDate, reminderToAdd.getAttribute("data-reminderContent"), reminderToAdd.getAttribute("data-reminderDueDate"), reminderToAdd.getAttribute("data-reminderClass"));
     reminderToAdd.checked = false;
   })
 });
 
-db.serialize(() => {
-  db.run(`CREATE TABLE IF NOT EXISTS reminders (
-    date TEXT,
-    reminder TEXT,
-    class TEXT,
-    timesReminded INT DEFAULT 0
-  );`);
+db.run(`CREATE TABLE IF NOT EXISTS reminders (
+  date TEXT,
+  dueDate TEXT,
+  reminder TEXT,
+  class TEXT,
+  timesReminded INT DEFAULT 0
+);`);
 
-  updateClasswork(classroom.showWork());
+updateClasswork(classroom.showWork());
 
-  setInterval(function () {
-    db.all(`SELECT * FROM reminders`, [], (err, rows) => {
-      if (err) {
-        throw err;
-      }
+setInterval(() => {
+  getReminders((rows) => {
+    const classworkJSON = classroom.showWork();
+    console.log(rows);
 
-      const classworkJSON = classroom.showWork();
-      console.log(rows);
+    rows.forEach(row => {
+      if (new Date(row.date) < new Date()) {
+        if (row.timesReminded % 1 == 0) {
+          notifier.notify({
+            title: `Reminder for ${row.class}`,
+            message: `Reminder to do the assignment ${row.reminder}\nDue on ${row.dueDate.toString().split(" GM")[0].toString().split(" GM")[0]}`,
+            icon: "./googleclassroomicon.png",
+            wait: true,
+            sound: true
+          });
 
-      rows.forEach(row => {
-        if (new Date(row.date) < new Date()) {
-          if (row.timesReminded % 1 == 0) {
-            const assignment = classworkJSON.find(e => e.title == row.reminder);
-
-            if (assignment == undefined) {
-              db.run(`DELETE FROM reminders WHERE date="${row.date}"`);
-            }
-            else {
-              const dueDate = new Date(assignment.dueDate.year, assignment.dueDate.month - 1, assignment.dueDate.day, assignment.dueTime.hours - 8, assignment.dueTime.minutes);
-
-              notifier.notify({
-                title: `Reminder for ${row.class}`,
-                message: `Reminder to do the assignment ${row.reminder}\nDue on ${dueDate.toString().split(" GM")[0]}`,
-                icon: "./googleclassroomicon.png",
-                wait: true,
-                sound: true
-              });
-
-              notifier.on('click', function (notifierObject, options, event) {
-                db.run(`DELETE FROM reminders WHERE date="${row.date}"`);
-              });
-            }
-          }
-
-          db.run(`UPDATE reminders SET timesReminded=${row.timesReminded + 1} WHERE date="${row.date}"`);
+          notifier.on('click', (notifierObject, options, event) => {
+            db.run(`DELETE FROM reminders WHERE date="${row.date}"`);
+          });
         }
-      });
+
+        db.run(`UPDATE reminders SET timesReminded=${row.timesReminded + 1} WHERE date="${row.date}"`);
+      }
     });
-  }, 300000);
+  });
+}, 300000);
+
+document.getElementById("viewReminders").addEventListener("click", () => {
+  const modal = document.getElementById("modal");
+  const titleElement = modal.getElementsByClassName("title")[0];
+  const contentElement = modal.getElementsByClassName("description")[0];
+  const titleText = document.createTextNode("Current Reminders");
+  titleElement.appendChild(titleText);
+
+  getReminders(rows => {
+    rows.forEach(row => {
+      const reminderElement = document.createElement("p");
+      const reminderText = document.createTextNode(`Reminder on ${row.date} for ${row.reminder} due on ${row.dueDate.toString().split(" GM")[0]}`);
+      reminderElement.appendChild(reminderText)
+      contentElement.appendChild(reminderElement);
+    });
+  });
+
+  modal.style.display = "block";
 });
 
 function updateClasswork(classworkJSON) {
@@ -105,10 +105,17 @@ function updateClasswork(classworkJSON) {
     classNameElement.classList.add("className");
     sectionElement.classList.add("section");
 
+    const classInfoHr = document.createElement("hr");
+    classInfoHr.classList.add("classInfoHr");
+
     classInfoItem.appendChild(classNameElement);
     classInfoItem.appendChild(sectionElement);
+    classInfoItem.appendChild(classInfoHr);
     classInfoItem.classList.add("classInfoItem");
     classElement.appendChild(classInfoItem);
+
+    const allAssignmentsElement = document.createElement("div");
+    allAssignmentsElement.classList.add("allAssignmentsItem");
 
     classWork.forEach(assignment => {
       const assignmentElement = document.createElement("div");
@@ -119,14 +126,17 @@ function updateClasswork(classworkJSON) {
 
       const assignmentTextElement = document.createElement("div");
       const assignmentNameElement = document.createElement("span");
+      const assignmentDueDateElement = document.createElement("span");
       const assignmentNameText = document.createTextNode(assignment.title);
       assignmentNameElement.appendChild(assignmentNameText);
       assignmentNameElement.classList.add("assignmentName");
       const assignmentLineBreak = document.createElement("br");
       const assignmentDueDateText = document.createTextNode(dueDate);
-      assignmentTextElement.appendChild(assignmentNameElement);
+      assignmentDueDateElement.classList.add("assignmentDueDate");
+      assignmentDueDateElement.appendChild(assignmentDueDateText);
+      assignmentTextElement.appendChild(assignmentDueDateElement);
       assignmentTextElement.appendChild(assignmentLineBreak);
-      assignmentTextElement.appendChild(assignmentDueDateText);
+      assignmentTextElement.appendChild(assignmentNameElement);
       assignmentTextElement.classList.add("assignmentDiv");
       assignmentNameElement.setAttribute("data-title", assignment.title);
       assignmentNameElement.setAttribute("data-description", assignment.description);
@@ -139,18 +149,38 @@ function updateClasswork(classworkJSON) {
         console.log(description);
       });
 
-      const reminderCheckbox = document.createElement("input");
-      reminderCheckbox.setAttribute("type", "checkbox");
-      reminderCheckbox.setAttribute("data-reminderContent", assignment.title);
-      reminderCheckbox.setAttribute("data-reminderClass", className);
+      // const reminderCheckbox = document.createElement("input");
+      // reminderCheckbox.setAttribute("type", "checkbox");
+      // reminderCheckbox.setAttribute("data-reminderContent", assignment.title);
+      // reminderCheckbox.setAttribute("data-reminderClass", className);
+      // reminderCheckbox.setAttribute("data-reminderDueDate", dueDate);
 
       assignmentElement.classList.add("assignmentItem");
-      assignmentElement.appendChild(reminderCheckbox);
+      // assignmentElement.appendChild(reminderCheckbox);
       assignmentElement.appendChild(assignmentTextElement);
-      classElement.appendChild(assignmentElement);
+      allAssignmentsElement.appendChild(assignmentElement)
     });
+    classElement.appendChild(allAssignmentsElement);
     classesContainer.appendChild(classElement);
   });
 
   console.log("Classwork Updated!");
+}
+
+function addReminder(date, dueDate, content, className) {
+  db.run(`INSERT INTO reminders (date, dueDate, reminder, class) VALUES ("${date}", "${dueDate}", "${content}", "${className}")`, (err) => {
+    if (err) {
+      return console.log(err.message);
+    }
+  });
+}
+
+function getReminders(callback) {
+  db.all(`SELECT * FROM reminders`, [], (err, rows) => {
+    if (err) {
+      throw err;
+    }
+
+    callback(rows);
+  });
 }

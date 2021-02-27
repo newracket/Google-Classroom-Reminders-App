@@ -1,6 +1,8 @@
 body {
-  background-color: #23042e;
+  background-color: #000110;
+  color: #ffffff;
   margin: 0px !important;
+  font-family: "Verdana";
 }
 
 .container {
@@ -8,7 +10,9 @@ body {
   flex-flow: row wrap;
   justify-content: flex-start;
   align-items: stretch;
+  width: 100vw;
   height: 100vh;
+  position: absolute;
   overflow: hidden;
 }
 
@@ -18,14 +22,18 @@ body {
   justify-content: flex-start;
   align-items: flex-start;
   width: 70vw;
+  overflow: auto;
+  height: 100%;
 }
 
-#rightSideBar {
+#leftSideBar {
   width: 30vw;
-  border-left: 1px solid white;
+  border-right: 1px solid white;
   height: 100%;
   padding: 30px;
   box-sizing: border-box;
+  background-color: #000110;
+  opacity: 0.8;
 }
 
 button {
@@ -44,8 +52,6 @@ button:focus {
 
 .title {
   font-weight: bold;
-  font-family: "Arial";
-  color: #f4d43d;
   font-size: 32px;
 }
 
@@ -65,23 +71,45 @@ button:focus {
 }
 
 .classItem {
-  width: 300px;
-  height: 300px;
-  border-radius: 0.5rem;
-  padding: 30px;
+  width: 345px;
+  height: 360px;
+  border-radius: 1rem;
   margin: 20px;
-  background-color: #3f1755;
+  background-color: #d9d9d9;
+  position: relative;
 }
 
-.classItem {
-  font-weight: bold;
-  font-family: "Arial";
-  color: #f4d43d;
+.classInfoHr {
+  height: 3px;
+  background-color: #ffffff;
+  border: none !important;
 }
 
 .classInfoItem {
-  border-bottom: 1px solid #ffffff;
-  margin-bottom: 20px;
+  background-color: #43b1b1;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  border-right: 3px solid #388080;
+  border-left: 3px solid #388080;
+  padding: 15px;
+}
+
+.allAssignmentsItem {
+  padding-top: 10px;
+  border-right: 3px solid #989898;
+  border-left: 3px solid #989898;
+  background-color: #d9d9d9;
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+  height: 256px;
+}
+
+.assignmentItem {
+  font-size: 16px;
+  margin: 10px;
+  background-color: #ececec;
+  border-radius: 0.8rem;
+  padding: 5px;
 }
 
 p {
@@ -90,18 +118,19 @@ p {
 
 .className {
   font-size: 20px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  font-weight: bold;
+  margin-left: 0px;
+  margin-right: 0px;
 }
 
 .section {
   font-size: 16px;
+  margin-left: 0px;
+  margin-right: 0px;
   margin-bottom: 10px;
-}
-
-.assignmentItem {
-  font-family: "Roboto";
-  font-size: 16px;
-  color: #FFFFFF;
-  margin: 10px;
 }
 
 .assignmentDiv {
@@ -116,13 +145,20 @@ input[type="checkbox"] {
 
 .assignmentName {
   text-overflow: ellipsis;
-  overflow: hidden; 
+  overflow: hidden;
   white-space: nowrap;
   display: inline-block;
   width: 245px;
+  color: #6aaf9f !important;
 }
 
-.modal {
+.assignmentDueDate {
+  color: #51a89f;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+#modal {
   display: none;
   position: fixed;
   width: 50%;
