@@ -48,15 +48,11 @@ module.exports = {
       destroyer(server);
     });
   },
-  async getUserInfo() {
-    const userInfo = await classroom.userProfiles.get({ userId: "me" });
-
-    console.log(userInfo.data);
-  },
   async runSample() {
     // retrieve user profile
     const coursesList = await classroom.courses.list({ studentId: "me" });
     const currentCourses = coursesList.data.courses.filter(e => e.courseState == "ACTIVE");
+    const userInfo = await classroom.userProfiles.get({ userId: "me" });
 
     let allCurrentWork = [];
     for (const course of currentCourses) {
@@ -82,18 +78,20 @@ module.exports = {
 
     fs.writeFileSync("coursework.json", JSON.stringify(allCurrentWork));
     fs.writeFileSync("currentcourses.json", JSON.stringify(currentCourses));
+    fs.writeFileSync("userinfo.json", JSON.stringify(userInfo.data));
   },
   showWork() {
     const coursework = JSON.parse(fs.readFileSync("./coursework.json"));
     const classes = JSON.parse(fs.readFileSync("./currentcourses.json"));
-    const output = []
+    const userinfo = JSON.parse(fs.readFileSync("./userinfo.json"));
+    const output = [];
 
     coursework.forEach(work => {
       work.class = classes.find(c => c.id == work.courseId);
       output.push(work);
     });
 
-    return output;
+    return { 'userinfo': userinfo, 'classwork': output };
   }
 }
 

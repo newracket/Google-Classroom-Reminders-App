@@ -8,25 +8,42 @@
     content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';">
   <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
   <link rel="stylesheet" href="./index.css">
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
+    integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
   <title>Google Classroom Reminders</title>
 </head>
 
 <body>
   <div class="container">
     <div id="leftSideBar">
-      <h1 class="title">Google Classroom Reminders</h1>
-      <hr style="margin: 20px 0px 20px 0px;">
-      <div class="setReminderClass">
+      <div class="userinfo">
+        <img src="" id="userpicture" />
+        <h2 id="username"></h2>
+      </div>
+      <!-- <hr style="margin: 20px 0px 20px 0px;"> -->
+      <div class="buttons">
+        <div class="topButtons">
+          <button class="navigationButtons" id="classroom"><i class="fas fa-home fa-1x"></i>Classroom</button>
+          <button class="navigationButtons" id="reminders"><i class="far fa-bell fa-1x"></i>Active Reminders</button>
+          <button class="navigationButtons" id="calendar"><i class="far fa-calendar-alt fa-1x"></i>Calendar</button>
+        </div>
+        <div class="bottomButtons">
+          <button class="navigationButtons" id="settings"><i class="fas fa-cogs fa-1x"></i>Settings</button>
+          <button class="navigationButtons" id="signout"><i class="fas fa-sign-out-alt fa-flip-horizontal"></i></button>
+        </div>
+      </div>
+      <!-- <div class="setReminderClass">
         <input id="reminderDate" type="datetime-local" />
         <button id="confirmReminder">Confirm</button>
       </div>
       <button id="viewReminders">View Reminders</button>
-      <button id="removeReminders">Remove Reminders</button>
+      <button id="removeReminders">Remove Reminders</button> -->
     </div>
 
-    <div id="classesContainer"></div>
+    <div id="rightSideContainer">
+      <h1 class="title">Google Classroom Reminders</h1>
+      <div id="classesContainer"></div>
+    </div>
   </div>
 
   <div id="modal">

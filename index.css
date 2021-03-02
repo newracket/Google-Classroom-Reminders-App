@@ -16,24 +16,66 @@ body {
   overflow: hidden;
 }
 
+#rightSideContainer {
+  width: 75vw;
+  overflow: auto;
+  height: 100%;
+}
+
 #classesContainer {
   display: flex;
   flex-flow: row wrap;
   justify-content: flex-start;
   align-items: flex-start;
-  width: 70vw;
-  overflow: auto;
-  height: 100%;
 }
 
 #leftSideBar {
-  width: 30vw;
+  width: 25vw;
   border-right: 1px solid white;
   height: 100%;
   padding: 30px;
   box-sizing: border-box;
   background-color: #000110;
   opacity: 0.8;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.userinfo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+#userpicture {
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+}
+
+#username {
+  display: inline;
+  margin-left: 20px;
+}
+
+.buttons {
+  padding-top: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-grow: 2;
+}
+
+.navigationButtons {
+  background-color: transparent;
+  color: white;
+  font-size: 30px;
+  font-family: inherit;
+}
+
+i {
+  margin-right: 10px;
 }
 
 button {
@@ -53,6 +95,7 @@ button:focus {
 .title {
   font-weight: bold;
   font-size: 32px;
+  margin-left: 20px;
 }
 
 .setReminderClass {

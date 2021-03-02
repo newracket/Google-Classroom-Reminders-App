@@ -7,20 +7,24 @@ const sortedWork = {};
 const monthDictionary = { "January": "Jan", "February": "Feb", "March": "Mar", "April": "Apr", "May": "May", "June": "Jun", "July": "Jul", "August": "Aug", "September": "Sep", "October": "Oct", "November": "Nov", "December": "Dec" }
 const dayDictionary = { "Sunday": "Sun", "Monday": "Mon", "Tuesday": "Tue", "Wednesday": "Wed", "Thursday": "Thu", "Friday": "Fri", "Saturday": "Sat" }
 
-// const scopes = ['https://www.googleapis.com/auth/classroom.courses.readonly', 'https://www.googleapis.com/auth/classroom.coursework.me.readonly'];
+const scopes = ['https://www.googleapis.com/auth/classroom.courses.readonly',
+  'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
+  'https://www.googleapis.com/auth/classroom.rosters.readonly',
+  'https://www.googleapis.com/auth/classroom.profile.emails',
+  'https://www.googleapis.com/auth/classroom.profile.photos'];
 // classroom.authenticate(scopes)
 //   .then(client => classroom.runSample(client).then(() => updateClasswork(classroom.showWork())))
 //   .catch(console.error);
 
-document.getElementById("confirmReminder").addEventListener("click", () => {
-  const reminderDate = document.getElementById("reminderDate").value;
-  const remindersToAdd = [...document.querySelectorAll("input[type='checkbox'")].filter(checkbox => checkbox.checked);
+// document.getElementById("confirmReminder").addEventListener("click", () => {
+//   const reminderDate = document.getElementById("reminderDate").value;
+//   const remindersToAdd = [...document.querySelectorAll("input[type='checkbox'")].filter(checkbox => checkbox.checked);
 
-  remindersToAdd.forEach(reminderToAdd => {
-    addReminder(reminderDate, reminderToAdd.getAttribute("data-reminderContent"), reminderToAdd.getAttribute("data-reminderDueDate"), reminderToAdd.getAttribute("data-reminderClass"));
-    reminderToAdd.checked = false;
-  })
-});
+//   remindersToAdd.forEach(reminderToAdd => {
+//     addReminder(reminderDate, reminderToAdd.getAttribute("data-reminderContent"), reminderToAdd.getAttribute("data-reminderDueDate"), reminderToAdd.getAttribute("data-reminderClass"));
+//     reminderToAdd.checked = false;
+//   })
+// });
 
 db.run(`CREATE TABLE IF NOT EXISTS reminders (
   date TEXT,
@@ -34,9 +38,6 @@ updateClasswork(classroom.showWork());
 
 setInterval(() => {
   getReminders((rows) => {
-    const classworkJSON = classroom.showWork();
-    console.log(rows);
-
     rows.forEach(row => {
       if (new Date(row.date) < new Date()) {
         if (row.timesReminded % 1 == 0) {
@@ -59,24 +60,24 @@ setInterval(() => {
   });
 }, 300000);
 
-document.getElementById("viewReminders").addEventListener("click", () => {
-  const modal = document.getElementById("modal");
-  const titleElement = modal.getElementsByClassName("title")[0];
-  const contentElement = modal.getElementsByClassName("description")[0];
-  const titleText = document.createTextNode("Current Reminders");
-  titleElement.appendChild(titleText);
+// document.getElementById("viewReminders").addEventListener("click", () => {
+//   const modal = document.getElementById("modal");
+//   const titleElement = modal.getElementsByClassName("title")[0];
+//   const contentElement = modal.getElementsByClassName("description")[0];
+//   const titleText = document.createTextNode("Current Reminders");
+//   titleElement.appendChild(titleText);
 
-  getReminders(rows => {
-    rows.forEach(row => {
-      const reminderElement = document.createElement("p");
-      const reminderText = document.createTextNode(`Reminder on ${row.date} for ${row.reminder} due on ${row.dueDate.toString().split(" GM")[0]}`);
-      reminderElement.appendChild(reminderText)
-      contentElement.appendChild(reminderElement);
-    });
-  });
+//   getReminders(rows => {
+//     rows.forEach(row => {
+//       const reminderElement = document.createElement("p");
+//       const reminderText = document.createTextNode(`Reminder on ${row.date} for ${row.reminder} due on ${row.dueDate.toString().split(" GM")[0]}`);
+//       reminderElement.appendChild(reminderText)
+//       contentElement.appendChild(reminderElement);
+//     });
+//   });
 
-  modal.style.display = "block";
-});
+//   modal.style.display = "block";
+// });
 
 function updateClasswork(classworkJSON) {
   const classesContainer = document.getElementById("classesContainer");
@@ -84,7 +85,10 @@ function updateClasswork(classworkJSON) {
     classesContainer.removeChild(classesContainer.firstChild);
   }
 
-  classworkJSON.forEach(w => {
+  document.getElementById("userpicture").src = `https:${classworkJSON.userinfo.photoUrl}`;
+  document.getElementById("username").innerText = classworkJSON.userinfo.name.fullName;
+
+  classworkJSON.classwork.forEach(w => {
     if (sortedWork[w.class.name] == undefined) {
       sortedWork[w.class.name] = [];
     }
