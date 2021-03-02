@@ -1,11 +1,11 @@
-const fs = require('fs');
-const http = require('http');
-const url = require('url');
-const opn = require('open');
-const destroyer = require('server-destroy');
+const fs = require("fs");
+const http = require("http");
+const url = require("url");
+const opn = require("open");
+const destroyer = require("server-destroy");
 
-const { google } = require('googleapis');
-const classroom = google.classroom('v1');
+const { google } = require("googleapis");
+const classroom = google.classroom("v1");
 
 const credentials = JSON.parse(fs.readFileSync("credentials.json")).web;
 const oauth2Client = new google.auth.OAuth2(
@@ -22,18 +22,18 @@ module.exports = {
     return new Promise((resolve, reject) => {
       // grab the url that will be used for authorization
       const authorizeUrl = oauth2Client.generateAuthUrl({
-        access_type: 'offline',
-        scope: scopes.join(' '),
+        access_type: "offline",
+        scope: scopes.join(" "),
       });
       const server = http
         .createServer(async (req, res) => {
           try {
-            if (req.url.indexOf('/oauth2callback') > -1) {
-              const qs = new url.URL(req.url, 'http://localhost:3000')
+            if (req.url.indexOf("/oauth2callback") > -1) {
+              const qs = new url.URL(req.url, "http://localhost:3000")
                 .searchParams;
-              res.end('Authentication successful! Please return to the console.');
+              res.end("Authentication successful! Please return to the console.");
               server.destroy();
-              const { tokens } = await oauth2Client.getToken(qs.get('code'));
+              const { tokens } = await oauth2Client.getToken(qs.get("code"));
               oauth2Client.credentials = tokens; // eslint-disable-line require-atomic-updates
               resolve(oauth2Client);
             }
@@ -48,10 +48,15 @@ module.exports = {
       destroyer(server);
     });
   },
+  async getUserInfo() {
+    const userInfo = await classroom.userProfiles.get({ userId: "me" });
+
+    console.log(userInfo.data);
+  },
   async runSample() {
     // retrieve user profile
-    const coursesList = await classroom.courses.list({ studentId: 'me' });
-    const currentCourses = coursesList.data.courses.filter(e => e.courseState == 'ACTIVE');
+    const coursesList = await classroom.courses.list({ studentId: "me" });
+    const currentCourses = coursesList.data.courses.filter(e => e.courseState == "ACTIVE");
 
     let allCurrentWork = [];
     for (const course of currentCourses) {
@@ -92,7 +97,7 @@ module.exports = {
   }
 }
 
-// const scopes = ['https://www.googleapis.com/auth/classroom.courses', 'https://www.googleapis.com/auth/classroom.coursework.me'];
+// const scopes = ["https://www.googleapis.com/auth/classroom.courses", "https://www.googleapis.com/auth/classroom.coursework.me"];
 // authenticate(scopes)
 //   .then(client => runSample(client))
 //   .catch(console.error);
