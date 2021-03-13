@@ -48,7 +48,14 @@ module.exports = {
       destroyer(server);
     });
   },
+  async authenticateSaved() {
+    return new Promise((resolve, reject) => {
+      oauth2Client.credentials = JSON.parse(fs.readFileSync("oauthclient.json")).credentials;
+      resolve(oauth2Client);
+    });
+  },
   async runSample() {
+    console.log("Fetching Classwork Data");
     // retrieve user profile
     const coursesList = await classroom.courses.list({ studentId: "me" });
     const currentCourses = coursesList.data.courses.filter(e => e.courseState == "ACTIVE");

@@ -13,6 +13,9 @@
     "electron-rebuild": "^2.3.5"
   },
   "dependencies": {
+    "@vue/cli": "^4.5.11",
+    "electron-reload": "^1.5.0",
+    "google-auth-library": "^6.1.6",
     "googleapis": "^67.0.0",
     "growl": "^1.10.5",
     "node-notifier": "^9.0.0",

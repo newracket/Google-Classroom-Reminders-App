@@ -1,0 +1,20 @@
+{
+  "_events": {},
+  "_eventsCount": 0,
+  "transporter": {},
+  "credentials": {
+    "access_token": "ya29.a0AfH6SMB_UkXwMAMOZnqKDjWDhpO2Owm4h4IDZbWoV_reZk4L8QKNtjlX2Ye5Jd2n5PSP_POezGpH0i8VOsm5pG8an_F7JTFZe6snNI76tZgRVmewZAegYPLM1MmEOIzI-r70wJU9JfDZDDajfkfYvgh67NUCvg",
+    "scope": "https://www.googleapis.com/auth/classroom.rosters.readonly https://www.googleapis.com/auth/classroom.courses.readonly https://www.googleapis.com/auth/classroom.profile.emails https://www.googleapis.com/auth/classroom.profile.photos https://www.googleapis.com/auth/classroom.student-submissions.me.readonly",
+    "token_type": "Bearer",
+    "expiry_date": 1615063584904
+  },
+  "certificateCache": {},
+  "certificateExpiry": null,
+  "certificateCacheFormat": "PEM",
+  "refreshTokenPromises": {},
+  "_clientId": "911932649741-qt6ge9ud5os6dbcd7u2u5adaav8tibnl.apps.googleusercontent.com",
+  "_clientSecret": "dRXHKeyxsK5PBAk_UGyd6aX6",
+  "redirectUri": "http://localhost:3000/oauth2callback",
+  "eagerRefreshThresholdMillis": 300000,
+  "forceRefreshOnFailure": false
+}

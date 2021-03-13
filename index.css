@@ -33,6 +33,95 @@ body {
   width: 75vw;
   overflow: auto;
   height: 100%;
+  text-align: center;
+}
+
+#descriptionContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 91%;
+  width: 100%;
+}
+
+#innerDescriptionContainer {
+  background-color: #000110;
+  width: 80%;
+  min-height: 70%;
+  text-align: left;
+}
+
+#descriptionBox {
+  text-align: left;
+  width: 90%;
+}
+
+#deleteReminder {
+  background-color: #bf5949;
+  color: white;
+  float: right;
+  margin: 20px 50px 0px 0px;
+  display: block;
+}
+
+.reminderElement {
+  margin: 2% 0px 2% 10%;
+}
+
+.reminderNameElement {
+  font-weight: bold;
+  font-size: 20px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.reminderDateElement {
+  font-size: 12px;
+}
+
+.deleteReminderCheckbox:checked+.reminderContentElement::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 8px;
+  top: 13px;
+  left: 5px;
+  border: 3px solid white;
+  border-top: none;
+  border-right: none;
+  transform: rotate(-45deg);
+}
+
+.deleteReminderCheckbox {
+  position: absolute;
+  left: -999em;
+  line-height: 2.1ex;
+}
+
+.reminderContentElement {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  width: 100%;
+  display: inline-block;
+}
+
+.deleteReminderCheckbox+.reminderContentElement::before {
+  content: "";
+  display: inline-block;
+  height: 30px;
+  width: 30px;
+  background-color: rgba(0, 26, 44, 0.8);
+  border-radius: 50%;
+  margin-right: 7px;
+}
+
+.reminderNameDateElement {
+  display: inline-block;
+  width: 90%;
 }
 
 #classesContainer {
@@ -82,8 +171,9 @@ body {
 .navigationButtons {
   background-color: transparent;
   color: white;
-  font-size: 30px;
+  font-size: 24px;
   font-family: inherit;
+  font-weight: bold;
 }
 
 i {
@@ -107,7 +197,11 @@ button:focus {
 .title {
   font-weight: bold;
   font-size: 32px;
-  margin-left: 20px;
+  padding-left: 20px;
+  padding-top: 50px;
+  height: 9%;
+  margin: 0px;
+  box-sizing: border-box;
 }
 
 .setReminderClass {
@@ -157,6 +251,7 @@ button:focus {
   border-bottom-left-radius: 1rem;
   border-bottom-right-radius: 1rem;
   height: 256px;
+  overflow-y: auto;
 }
 
 .assignmentItem {
@@ -165,6 +260,7 @@ button:focus {
   background-color: #ececec;
   border-radius: 0.8rem;
   padding: 5px;
+  cursor: pointer;
 }
 
 p {
@@ -192,10 +288,6 @@ p {
   width: 90%;
   display: inline-block;
   margin-left: 5px;
-}
-
-input[type="checkbox"] {
-  vertical-align: top;
 }
 
 .assignmentName {

@@ -3,7 +3,6 @@ const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('reminders.db');
 const notifier = require("node-notifier");
 
-const sortedWork = {};
 const monthDictionary = { "January": "Jan", "February": "Feb", "March": "Mar", "April": "Apr", "May": "May", "June": "Jun", "July": "Jul", "August": "Aug", "September": "Sep", "October": "Oct", "November": "Nov", "December": "Dec" }
 const dayDictionary = { "Sunday": "Sun", "Monday": "Mon", "Tuesday": "Tue", "Wednesday": "Wed", "Thursday": "Thu", "Friday": "Fri", "Saturday": "Sat" }
 
@@ -13,8 +12,22 @@ const scopes = ['https://www.googleapis.com/auth/classroom.courses.readonly',
   'https://www.googleapis.com/auth/classroom.profile.emails',
   'https://www.googleapis.com/auth/classroom.profile.photos'];
 // classroom.authenticate(scopes)
-//   .then(client => classroom.runSample(client).then(() => updateClasswork(classroom.showWork())))
+//   .then(client => classroom.runSample(client)
+//     .then(updateClasswork))
 //   .catch(console.error);
+
+Element.prototype.appendChildren = function (...children) {
+  children.forEach(child => {
+    this.appendChild(child);
+  });
+
+  return this;
+}
+
+classroom.authenticateSaved()
+  .then(client => classroom.runSample(client)
+    .then(updateClasswork))
+  .catch(console.error);
 
 // document.getElementById("confirmReminder").addEventListener("click", () => {
 //   const reminderDate = document.getElementById("reminderDate").value;
@@ -34,59 +47,63 @@ db.run(`CREATE TABLE IF NOT EXISTS reminders (
   timesReminded INT DEFAULT 0
 );`);
 
-updateClasswork(classroom.showWork());
+document.getElementById("reminders").addEventListener("click", showActiveReminders);
+document.getElementById("classroom").addEventListener("click", updateClasswork);
+document.getElementById("deleteReminder").addEventListener("click", function () {
+  const remindersToDelete = [...document.querySelectorAll(".deleteReminderCheckbox")].filter(checkbox => checkbox.checked);
+
+  remindersToDelete.forEach(reminderToDelete => {
+    console.log(reminderToDelete.dataset.reminderdate);
+    console.log(reminderToDelete.dataset.remindercontent);
+    console.log(reminderToDelete.dataset.reminderduedate);
+    console.log(reminderToDelete.dataset.reminderclass);
+    db.run(`DELETE FROM reminders WHERE date="${reminderToDelete.dataset.reminderdate}" AND reminder="${reminderToDelete.dataset.remindercontent}" AND dueDate="${reminderToDelete.dataset.reminderduedate}" AND class="${reminderToDelete.dataset.reminderclass}"`)
+  });
+
+  showActiveReminders();
+});
+
+updateClasswork();
 
 setInterval(() => {
-  getReminders((rows) => {
-    rows.forEach(row => {
-      if (new Date(row.date) < new Date()) {
-        if (row.timesReminded % 1 == 0) {
-          notifier.notify({
-            title: `Reminder for ${row.class}`,
-            message: `Reminder to do the assignment ${row.reminder}\nDue on ${row.dueDate.toString().split(" GM")[0].toString().split(" GM")[0]}`,
-            icon: "./googleclassroomicon.png",
-            wait: true,
-            sound: true
-          });
+  getReminders()
+    .then(rows => {
+      rows.forEach(row => {
+        if (new Date(row.date) < new Date()) {
+          if (row.timesReminded % 1 == 0) {
+            notifier.notify({
+              title: `Reminder for ${row.class}`,
+              message: `Reminder to do the assignment ${row.reminder}\nDue on ${row.dueDate.toString().split(" GM")[0].toString().split(" GM")[0]}`,
+              icon: "./googleclassroomicon.png",
+              wait: true,
+              sound: true
+            });
 
-          notifier.on('click', (notifierObject, options, event) => {
-            db.run(`DELETE FROM reminders WHERE date="${row.date}"`);
-          });
+            notifier.on('click', (notifierObject, options, event) => {
+              db.run(`DELETE FROM reminders WHERE date="${row.date}"`);
+            });
+          }
+
+          db.run(`UPDATE reminders SET timesReminded=${row.timesReminded + 1} WHERE date="${row.date}"`);
         }
-
-        db.run(`UPDATE reminders SET timesReminded=${row.timesReminded + 1} WHERE date="${row.date}"`);
-      }
-    });
-  });
+      });
+    })
+    .catch(console.error);
 }, 300000);
 
-// document.getElementById("viewReminders").addEventListener("click", () => {
-//   const modal = document.getElementById("modal");
-//   const titleElement = modal.getElementsByClassName("title")[0];
-//   const contentElement = modal.getElementsByClassName("description")[0];
-//   const titleText = document.createTextNode("Current Reminders");
-//   titleElement.appendChild(titleText);
-
-//   getReminders(rows => {
-//     rows.forEach(row => {
-//       const reminderElement = document.createElement("p");
-//       const reminderText = document.createTextNode(`Reminder on ${row.date} for ${row.reminder} due on ${row.dueDate.toString().split(" GM")[0]}`);
-//       reminderElement.appendChild(reminderText)
-//       contentElement.appendChild(reminderElement);
-//     });
-//   });
-
-//   modal.style.display = "block";
-// });
-
-function updateClasswork(classworkJSON) {
+function updateClasswork() {
+  const classworkJSON = classroom.showWork();
   const classesContainer = document.getElementById("classesContainer");
   while (classesContainer.firstChild) {
     classesContainer.removeChild(classesContainer.firstChild);
   }
+  document.getElementsByClassName("title")[0].innerText = "Google Classroom";
+  document.getElementById("classesContainer").style.display = "flex";
+  document.getElementById("descriptionContainer").style.display = "none";
 
   document.getElementById("userpicture").src = `https:${classworkJSON.userinfo.photoUrl}`;
   document.getElementById("username").innerText = classworkJSON.userinfo.name.fullName;
+  const sortedWork = {};
 
   classworkJSON.classwork.forEach(w => {
     if (sortedWork[w.class.name] == undefined) {
@@ -99,51 +116,31 @@ function updateClasswork(classworkJSON) {
     const classElement = document.createElement("div");
     classElement.classList.add("classItem");
 
-    const classInfoItem = document.createElement("div");
-    const classNameElement = document.createElement("p");
-    const sectionElement = document.createElement("p");
-    const classNameText = document.createTextNode(className);
-    const sectionText = document.createTextNode(classWork[0].class.section)
-    classNameElement.appendChild(classNameText);
-    sectionElement.appendChild(sectionText);
-    classNameElement.classList.add("className");
-    sectionElement.classList.add("section");
+    const classInfoItem = createElement("div", "classInfoItem");
+    const classNameElement = createElement("p", "className", className);
+    const sectionElement = createElement("p", "section", classWork[0].class.section);
 
-    const classInfoHr = document.createElement("hr");
-    classInfoHr.classList.add("classInfoHr");
+    const classInfoHr = createElement("hr", "classInfoHr");
 
-    classInfoItem.appendChild(classNameElement);
-    classInfoItem.appendChild(sectionElement);
-    classInfoItem.appendChild(classInfoHr);
-    classInfoItem.classList.add("classInfoItem");
+    classInfoItem.appendChildren(classNameElement, sectionElement, classInfoHr);
     classElement.appendChild(classInfoItem);
 
-    const allAssignmentsElement = document.createElement("div");
-    allAssignmentsElement.classList.add("allAssignmentsItem");
+    const allAssignmentsElement = createElement("div", "allAssignmentsItem");
 
     classWork.forEach(assignment => {
-      const assignmentElement = document.createElement("div");
+      const assignmentElement = createElement("div", "assignmentItem");
       const dueDate = new Date(assignment.dueDate.year, assignment.dueDate.month - 1, assignment.dueDate.day, assignment.dueTime.hours - 8, assignment.dueTime.minutes)
         .toLocaleString("en-US", { dateStyle: "full", timeStyle: "short" })
         .split(" ").map(word => monthDictionary[word] != undefined ? `${monthDictionary[word]}.` : word)
         .map(word => dayDictionary[word.slice(0, -1)] != undefined ? `${dayDictionary[word.slice(0, -1)]},` : word).join(" ");
 
-      const assignmentTextElement = document.createElement("div");
-      const assignmentNameElement = document.createElement("span");
-      const assignmentDueDateElement = document.createElement("span");
-      const assignmentNameText = document.createTextNode(assignment.title);
-      assignmentNameElement.appendChild(assignmentNameText);
-      assignmentNameElement.classList.add("assignmentName");
-      const assignmentLineBreak = document.createElement("br");
+      const assignmentTextElement = createElement("div", "assignmentDiv");
+      const assignmentNameElement = createElement("span", "assignmentName", assignment.title, undefined, { "data-title": assignment.title, "data-description": assignment.description });
+      const assignmentDueDateElement = createElement("span", "assignmentDueDate");
+      const assignmentLineBreak = createElement("br");
       const assignmentDueDateText = document.createTextNode(dueDate);
-      assignmentDueDateElement.classList.add("assignmentDueDate");
       assignmentDueDateElement.appendChild(assignmentDueDateText);
-      assignmentTextElement.appendChild(assignmentDueDateElement);
-      assignmentTextElement.appendChild(assignmentLineBreak);
-      assignmentTextElement.appendChild(assignmentNameElement);
-      assignmentTextElement.classList.add("assignmentDiv");
-      assignmentNameElement.setAttribute("data-title", assignment.title);
-      assignmentNameElement.setAttribute("data-description", assignment.description);
+      assignmentTextElement.appendChildren(assignmentDueDateElement, assignmentLineBreak, assignmentNameElement);
 
       assignmentNameElement.addEventListener("click", function () {
         const title = this.dataset.title;
@@ -153,14 +150,6 @@ function updateClasswork(classworkJSON) {
         console.log(description);
       });
 
-      // const reminderCheckbox = document.createElement("input");
-      // reminderCheckbox.setAttribute("type", "checkbox");
-      // reminderCheckbox.setAttribute("data-reminderContent", assignment.title);
-      // reminderCheckbox.setAttribute("data-reminderClass", className);
-      // reminderCheckbox.setAttribute("data-reminderDueDate", dueDate);
-
-      assignmentElement.classList.add("assignmentItem");
-      // assignmentElement.appendChild(reminderCheckbox);
       assignmentElement.appendChild(assignmentTextElement);
       allAssignmentsElement.appendChild(assignmentElement)
     });
@@ -179,12 +168,88 @@ function addReminder(date, dueDate, content, className) {
   });
 }
 
-function getReminders(callback) {
-  db.all(`SELECT * FROM reminders`, [], (err, rows) => {
-    if (err) {
-      throw err;
-    }
+function getReminders() {
+  return new Promise((resolve, reject) => {
+    db.all(`SELECT * FROM reminders`, [], (err, rows) => {
+      if (err) {
+        throw err;
+      }
 
-    callback(rows);
+      resolve(rows);
+    });
   });
+}
+
+function showActiveReminders() {
+  document.getElementsByClassName("title")[0].innerText = "Active Reminders";
+  document.getElementById("classesContainer").style.display = "none";
+  document.getElementById("descriptionContainer").style.display = "flex";
+  const descriptionBoxElement = document.getElementById("descriptionBox");
+
+  while (descriptionBoxElement.firstChild) {
+    descriptionBoxElement.removeChild(descriptionBoxElement.firstChild);
+  }
+
+  getReminders()
+    .then(rows => {
+      rows.forEach((row, i) => {
+        const reminderElement = createElement("div", "reminderElement");
+        const reminderContentElement = createElement("label", "reminderContentElement", undefined, undefined, { "for": `${i}Checkbox` });
+        const reminderNameDateElement = createElement("div", "reminderNameDateElement");
+        const reminderNameElement = createElement("div", "reminderNameElement", row.reminder);
+        const reminderDateElement = createElement("div", "reminderDateElement", row.date);
+
+        const reminderCheckbox = createElement("input", "deleteReminderCheckbox", undefined, `${i}Checkbox`,
+          {
+            "type": "checkbox",
+            "data-remindercontent": row.reminder,
+            "data-reminderclass": row.class,
+            "data-reminderdate": row.date,
+            "data-reminderduedate": row.dueDate
+          });
+
+        reminderNameDateElement.appendChildren(reminderNameElement, reminderDateElement);
+        reminderContentElement.appendChild(reminderNameDateElement);
+        reminderElement.appendChildren(reminderCheckbox, reminderContentElement);
+        descriptionBoxElement.appendChild(reminderElement);
+      });
+    })
+    .catch(console.error);
+}
+
+function formatDate(date) {
+  const formattedDate = new Date(date)
+    .toLocaleString("en-US", { dateStyle: "full", timeStyle: "short" })
+    .split(" ").map(word => monthDictionary[word] != undefined ? `${monthDictionary[word]}.` : word)
+    .map(word => dayDictionary[word.slice(0, -1)] != undefined ? `${dayDictionary[word.slice(0, -1)]},` : word).join(" ");
+
+  return formattedDate;
+}
+
+function createElement(elementName, classes, text, id, attributes) {
+  const element = document.createElement(elementName);
+
+  if (typeof classes == "string") {
+    element.classList.add(classes);
+  }
+  else if (typeof classes == "object") {
+    classes.forEach(c => element.classList.add(c));
+  }
+
+  if (text) {
+    const elementText = document.createTextNode(text);
+    element.appendChild(elementText);
+  }
+
+  if (id) {
+    element.setAttribute("id", id);
+  }
+
+  if (attributes) {
+    Object.entries(attributes).forEach(([attributeName, attributeValue]) => {
+      element.setAttribute(attributeName, attributeValue);
+    });
+  }
+
+  return element;
 }
