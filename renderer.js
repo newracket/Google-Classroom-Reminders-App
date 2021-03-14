@@ -2,6 +2,7 @@ const classroom = require("./classroom");
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('reminders.db');
 const notifier = require("node-notifier");
+const flatpickr = require("flatpickr");
 
 const monthDictionary = { "January": "Jan", "February": "Feb", "March": "Mar", "April": "Apr", "May": "May", "June": "Jun", "July": "Jul", "August": "Aug", "September": "Sep", "October": "Oct", "November": "Nov", "December": "Dec" }
 const dayDictionary = { "Sunday": "Sun", "Monday": "Mon", "Tuesday": "Tue", "Wednesday": "Wed", "Thursday": "Thu", "Friday": "Fri", "Saturday": "Sat" }
@@ -24,10 +25,14 @@ Element.prototype.appendChildren = function (...children) {
   return this;
 }
 
-classroom.authenticateSaved()
-  .then(client => classroom.runSample(client)
-    .then(updateClasswork))
-  .catch(console.error);
+// classroom.authenticateSaved()
+//   .then(client => classroom.runSample(client)
+//     .then(updateClasswork))
+//   .catch(console.error);
+
+// document.getElementById("reminderDate").addEventListener("click", () => {
+//   document.getElementById("reminderDateInput").click();
+// });
 
 // document.getElementById("confirmReminder").addEventListener("click", () => {
 //   const reminderDate = document.getElementById("reminderDate").value;
@@ -99,6 +104,7 @@ function updateClasswork() {
   }
   document.getElementsByClassName("title")[0].innerText = "Google Classroom";
   document.getElementById("classesContainer").style.display = "flex";
+  document.getElementById("reminderContainer").style.display = "none";
   document.getElementById("descriptionContainer").style.display = "none";
 
   document.getElementById("userpicture").src = `https:${classworkJSON.userinfo.photoUrl}`;
@@ -128,27 +134,21 @@ function updateClasswork() {
     const allAssignmentsElement = createElement("div", "allAssignmentsItem");
 
     classWork.forEach(assignment => {
-      const assignmentElement = createElement("div", "assignmentItem");
+      const assignmentElement = createElement("div", "assignmentItem", undefined, undefined, { "data-title": assignment.title, "data-description": assignment.description });
       const dueDate = new Date(assignment.dueDate.year, assignment.dueDate.month - 1, assignment.dueDate.day, assignment.dueTime.hours - 8, assignment.dueTime.minutes)
         .toLocaleString("en-US", { dateStyle: "full", timeStyle: "short" })
         .split(" ").map(word => monthDictionary[word] != undefined ? `${monthDictionary[word]}.` : word)
         .map(word => dayDictionary[word.slice(0, -1)] != undefined ? `${dayDictionary[word.slice(0, -1)]},` : word).join(" ");
 
       const assignmentTextElement = createElement("div", "assignmentDiv");
-      const assignmentNameElement = createElement("span", "assignmentName", assignment.title, undefined, { "data-title": assignment.title, "data-description": assignment.description });
+      const assignmentNameElement = createElement("span", "assignmentName", assignment.title);
       const assignmentDueDateElement = createElement("span", "assignmentDueDate");
       const assignmentLineBreak = createElement("br");
       const assignmentDueDateText = document.createTextNode(dueDate);
       assignmentDueDateElement.appendChild(assignmentDueDateText);
       assignmentTextElement.appendChildren(assignmentDueDateElement, assignmentLineBreak, assignmentNameElement);
 
-      assignmentNameElement.addEventListener("click", function () {
-        const title = this.dataset.title;
-        const description = this.dataset.description;
-
-        console.log(title);
-        console.log(description);
-      });
+      assignmentElement.addEventListener("click", showReminderContent);
 
       assignmentElement.appendChild(assignmentTextElement);
       allAssignmentsElement.appendChild(assignmentElement)
@@ -180,12 +180,38 @@ function getReminders() {
   });
 }
 
+function showReminderContent() {
+  document.getElementsByClassName("title")[0].innerText = "Active Reminders";
+  document.getElementById("classesContainer").style.display = "none";
+  document.getElementById("reminderContainer").style.display = "flex";
+  document.getElementById("descriptionContainer").style.display = "none";
+
+  document.getElementById("reminderName").innerText = this.dataset.title;
+  document.getElementById("reminderDescription").innerText = this.dataset.description;
+
+  flatpickr("#reminderDate", {
+    altInput: true,
+    altFormat: "F j, Y",
+    dateFormat: "Y-m-d",
+    defaultDate: new Date()
+  });
+
+  flatpickr("#reminderTime", {
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "h:i K",
+    defaultDate: new Date(),
+    time_24hr: false
+  });
+}
+
 function showActiveReminders() {
   document.getElementsByClassName("title")[0].innerText = "Active Reminders";
   document.getElementById("classesContainer").style.display = "none";
   document.getElementById("descriptionContainer").style.display = "flex";
-  const descriptionBoxElement = document.getElementById("descriptionBox");
+  document.getElementById("reminderContainer").style.display = "none";
 
+  const descriptionBoxElement = document.getElementById("descriptionBox");
   while (descriptionBoxElement.firstChild) {
     descriptionBoxElement.removeChild(descriptionBoxElement.firstChild);
   }

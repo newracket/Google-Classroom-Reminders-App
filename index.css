@@ -36,6 +36,116 @@ body {
   text-align: center;
 }
 
+#reminderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 91%;
+  width: 100%;
+}
+
+#innerReminderContainer {
+  background-color: #000110;
+  width: 80%;
+  min-height: 70%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+#reminderBox {
+  text-align: left;
+  width: 60%;
+  height: 100%;
+}
+
+input.input {
+  background-color: rgba(0, 26, 44, 0.8);
+  display: inline-block;
+  padding: 10px;
+  border-radius: 0.5rem;
+  margin-right: 5px;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  color: inherit;
+  border: none;
+  width: 200px;
+}
+
+input.input:focus {
+  outline: none;
+}
+
+#arrowleft {
+  background-color: rgba(0, 26, 44, 0.8);
+  border-radius: 50%;
+}
+
+#reminderTime {
+  background-color: rgba(0, 26, 44, 0.8);
+  display: inline-block;
+  padding: 10px;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  color: inherit;
+  border: none;
+  width: 100px;
+}
+
+#reminderTime:focus {
+  outline: none;
+}
+
+#reminderNameBox {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+#reminderNameHr {
+  display: inline-block;
+  width: 90%;
+}
+
+#reminderName {
+  font-size: 24px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+#reminderUnderline {
+  border: none;
+  height: 2px;
+  background-color: white;
+  margin-top: 0px;
+}
+
+#reminderDescriptionBox {
+  margin-top: 30px;
+  display: flex;
+  align-items: top;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  margin-left: 7px;
+}
+
+#reminderDescription {
+  background-color: rgba(0, 26, 44, 0.8);
+  display: inline-block;
+  width: 100%;
+  padding: 10px;
+  border-radius: 0.5rem;
+  height: 60%;
+}
+
 #descriptionContainer {
   display: flex;
   justify-content: center;
@@ -209,8 +319,12 @@ button:focus {
   padding: 0px !important;
 }
 
-#reminderDate {
-  height: 92% !important;
+#reminderDateBox {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  margin-top: 40px;
+  margin-left: 7px;
 }
 
 #confirmReminder {
@@ -303,16 +417,4 @@ p {
   color: #51a89f;
   font-weight: bold;
   font-size: 15px;
-}
-
-#modal {
-  display: none;
-  position: fixed;
-  width: 50%;
-  height: 60%;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  background-color: #ffffff;
-  color: #000000;
 }
