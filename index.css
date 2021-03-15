@@ -254,7 +254,6 @@ input.input:focus {
 
 #leftSideBar {
   width: 25vw;
-  border-right: 1px solid white;
   height: 100%;
   padding: 30px;
   box-sizing: border-box;
