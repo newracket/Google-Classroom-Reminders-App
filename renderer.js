@@ -66,6 +66,7 @@ db.run(`CREATE TABLE IF NOT EXISTS reminders (
 
 document.getElementById("reminders").addEventListener("click", showActiveReminders);
 document.getElementById("classroom").addEventListener("click", updateClasswork);
+document.getElementById("arrowleft").addEventListener("click", updateClasswork);
 document.getElementById("deleteReminder").addEventListener("click", function () {
   const remindersToDelete = [...document.querySelectorAll(".deleteReminderCheckbox")].filter(checkbox => checkbox.checked);
 

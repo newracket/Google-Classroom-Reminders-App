@@ -81,6 +81,7 @@ input.input:focus {
 #arrowleft {
   background-color: rgba(0, 26, 44, 0.8);
   border-radius: 50%;
+  cursor: pointer;
 }
 
 #reminderTime {
