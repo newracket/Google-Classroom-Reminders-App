@@ -7,6 +7,20 @@ const flatpickr = require("flatpickr");
 const monthDictionary = { "January": "Jan", "February": "Feb", "March": "Mar", "April": "Apr", "May": "May", "June": "Jun", "July": "Jul", "August": "Aug", "September": "Sep", "October": "Oct", "November": "Nov", "December": "Dec" }
 const dayDictionary = { "Sunday": "Sun", "Monday": "Mon", "Tuesday": "Tue", "Wednesday": "Wed", "Thursday": "Thu", "Friday": "Fri", "Saturday": "Sat" }
 
+const reminderDateFpicker = flatpickr("#reminderDate", {
+  altInput: true,
+  altFormat: "F j, Y",
+  dateFormat: "Y-m-d",
+  defaultDate: new Date()
+});
+const reminderTimeFpicker = flatpickr("#reminderTime", {
+  enableTime: true,
+  noCalendar: true,
+  dateFormat: "h:i K",
+  defaultDate: new Date(),
+  time_24hr: false
+});
+
 const scopes = ['https://www.googleapis.com/auth/classroom.courses.readonly',
   'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
   'https://www.googleapis.com/auth/classroom.rosters.readonly',
@@ -30,19 +44,17 @@ Element.prototype.appendChildren = function (...children) {
 //     .then(updateClasswork))
 //   .catch(console.error);
 
-// document.getElementById("reminderDate").addEventListener("click", () => {
-//   document.getElementById("reminderDateInput").click();
-// });
+document.getElementById("saveReminder").addEventListener("click", () => {
+  const reminderName = document.getElementById("reminderName").innerText;
+  const reminderClass = document.getElementById("reminderName").dataset.class;
+  const reminderDueDate = document.getElementById("reminderDueDate").innerText;
 
-// document.getElementById("confirmReminder").addEventListener("click", () => {
-//   const reminderDate = document.getElementById("reminderDate").value;
-//   const remindersToAdd = [...document.querySelectorAll("input[type='checkbox'")].filter(checkbox => checkbox.checked);
+  const reminderDate = new Date(reminderDateFpicker.selectedDates)
+  const reminderTime = new Date(reminderTimeFpicker.selectedDates)
+  const reminderDateTimeFormatted = new Date(reminderDate.getFullYear(), reminderDate.getMonth(), reminderDate.getDate(), reminderTime.getHours(), reminderTime.getMinutes());
 
-//   remindersToAdd.forEach(reminderToAdd => {
-//     addReminder(reminderDate, reminderToAdd.getAttribute("data-reminderContent"), reminderToAdd.getAttribute("data-reminderDueDate"), reminderToAdd.getAttribute("data-reminderClass"));
-//     reminderToAdd.checked = false;
-//   })
-// });
+  addReminder(reminderDateTimeFormatted, reminderDueDate, reminderName, reminderClass);
+});
 
 db.run(`CREATE TABLE IF NOT EXISTS reminders (
   date TEXT,
@@ -134,11 +146,11 @@ function updateClasswork() {
     const allAssignmentsElement = createElement("div", "allAssignmentsItem");
 
     classWork.forEach(assignment => {
-      const assignmentElement = createElement("div", "assignmentItem", undefined, undefined, { "data-title": assignment.title, "data-description": assignment.description });
       const dueDate = new Date(assignment.dueDate.year, assignment.dueDate.month - 1, assignment.dueDate.day, assignment.dueTime.hours - 8, assignment.dueTime.minutes)
         .toLocaleString("en-US", { dateStyle: "full", timeStyle: "short" })
         .split(" ").map(word => monthDictionary[word] != undefined ? `${monthDictionary[word]}.` : word)
         .map(word => dayDictionary[word.slice(0, -1)] != undefined ? `${dayDictionary[word.slice(0, -1)]},` : word).join(" ");
+      const assignmentElement = createElement("div", "assignmentItem", undefined, undefined, { "data-title": assignment.title, "data-description": assignment.description, "data-class": assignment.class.name, "data-duedate": dueDate });
 
       const assignmentTextElement = createElement("div", "assignmentDiv");
       const assignmentNameElement = createElement("span", "assignmentName", assignment.title);
@@ -187,22 +199,16 @@ function showReminderContent() {
   document.getElementById("descriptionContainer").style.display = "none";
 
   document.getElementById("reminderName").innerText = this.dataset.title;
-  document.getElementById("reminderDescription").innerText = this.dataset.description;
+  document.getElementById("reminderName").dataset.class = this.dataset.class;
+  document.getElementById("reminderDueDate").innerText = this.dataset.duedate;
 
-  flatpickr("#reminderDate", {
-    altInput: true,
-    altFormat: "F j, Y",
-    dateFormat: "Y-m-d",
-    defaultDate: new Date()
-  });
-
-  flatpickr("#reminderTime", {
-    enableTime: true,
-    noCalendar: true,
-    dateFormat: "h:i K",
-    defaultDate: new Date(),
-    time_24hr: false
-  });
+  console.log(this.dataset.description);
+  if (this.dataset.description != "undefined") {
+    document.getElementById("reminderDescription").innerText = this.dataset.description;
+  }
+  else {
+    document.getElementById("reminderDescription").innerText = "No Description.";
+  }
 }
 
 function showActiveReminders() {
