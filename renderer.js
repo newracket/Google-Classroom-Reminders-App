@@ -48,14 +48,14 @@ document.getElementById("saveReminder").addEventListener("click", () => {
   const reminderName = document.getElementById("reminderName").innerText;
   const reminderClass = document.getElementById("reminderName").dataset.class;
   const reminderDueDate = document.getElementById("reminderDueDate").innerText;
-  const reminderOldDate = document.getElementById("reminderName").dataset.oldDate;
+  const reminderId = document.getElementById("reminderName").dataset.id;
 
   const reminderDate = new Date(reminderDateFpicker.selectedDates);
   const reminderTime = new Date(reminderTimeFpicker.selectedDates);
   const reminderDateTimeFormatted = new Date(reminderDate.getFullYear(), reminderDate.getMonth(), reminderDate.getDate(), reminderTime.getHours(), reminderTime.getMinutes());
 
-  if (reminderOldDate != undefined) {
-    db.removeReminder(reminderOldDate, reminderDueDate, reminderName, reminderClass)
+  if (reminderId != undefined) {
+    db.removeReminders([reminderId])
       .then(res => db.addReminder(reminderDateTimeFormatted, reminderDueDate, reminderName, reminderClass)
         .then(res => document.getElementById("arrowleft").click())
         .catch(console.log))
@@ -76,12 +76,9 @@ document.getElementById("classroom").addEventListener("click", updateClasswork);
 document.getElementById("deleteReminder").addEventListener("click", function () {
   const remindersToDelete = [...document.querySelectorAll(".deleteReminderCheckbox")].filter(checkbox => checkbox.checked);
 
-  remindersToDelete.forEach(reminderToDelete => {
-    db.removeReminder(reminderToDelete.dataset.date, reminderToDelete.dataset.duedate, reminderToDelete.dataset.title, reminderToDelete.dataset.class)
-      .catch(console.log);
-  });
-
-  showActiveReminders();
+  db.removeReminders(remindersToDelete.map(reminderToDelete => reminderToDelete.dataset.id))
+    .then(showActiveReminders)
+    .catch(console.log);
 });
 
 updateClasswork();
@@ -143,8 +140,6 @@ function updateClasswork() {
     classElement.appendChild(allAssignmentsElement);
     classesContainer.appendChild(classElement);
   });
-
-  console.log("Classwork Updated!");
 }
 
 function showReminderContent(backfunction, element) {
@@ -157,8 +152,8 @@ function showReminderContent(backfunction, element) {
   document.getElementById("reminderName").dataset.class = element.dataset.class;
   document.getElementById("reminderDueDate").innerText = element.dataset.duedate;
 
-  if (element.dataset.date != undefined) {
-    document.getElementById("reminderName").dataset.oldDate = element.dataset.date;
+  if (element.dataset.id != undefined) {
+    document.getElementById("reminderName").dataset.id = element.dataset.id;
   }
 
   if (element.dataset.description != "undefined") {
@@ -198,10 +193,11 @@ function showActiveReminders() {
           {
             "type": "checkbox",
             "data-title": row.reminder,
-            "data-class": row.class,
             "data-date": row.date,
             "data-duedate": row.dueDate,
-            "data-description": description
+            "data-description": description,
+            "data-class": row.class,
+            "data-id": row.id
           });
 
         editReminderButton.addEventListener("click", () => {

@@ -6,6 +6,7 @@ module.exports = {
   initialize() {
     return new Promise((resolve, reject) => {
       db.run(`CREATE TABLE IF NOT EXISTS reminders (
+        id INT,
         date TEXT,
         dueDate TEXT,
         reminder TEXT,
@@ -16,15 +17,23 @@ module.exports = {
   },
   addReminder(date, dueDate, content, className) {
     return new Promise((resolve, reject) => {
-      db.run(`INSERT INTO reminders (date, dueDate, reminder, class) VALUES ("${date}", "${dueDate}", "${content}", "${className}")`, (err, rows) => {
-        console.log(rows);
-        console.log(err);
+      db.all(`SELECT * FROM reminders ORDER BY id DESC LIMIT 1`, [], (err, rows) => {
         if (err) {
           reject(err);
         }
-        else {
-          resolve();
+
+        if (rows.length == 0) {
+          rows.push({ id: 0 });
         }
+
+        db.run(`INSERT INTO reminders (id, date, dueDate, reminder, class) VALUES (${rows[0].id + 1}, "${date}", "${dueDate}", "${content.replace(/"/g, "'")}", "${className.replace(/"/g, "'")}")`, (err) => {
+          if (err) {
+            reject(err);
+          }
+          else {
+            resolve();
+          }
+        });
       });
     });
   },
@@ -40,9 +49,9 @@ module.exports = {
       });
     });
   },
-  removeReminder(date, dueDate, content, className) {
+  removeReminders(ids) {
     return new Promise((resolve, reject) => {
-      db.run(`DELETE FROM reminders WHERE date="${date}" AND reminder="${content}" AND dueDate="${dueDate}" AND class="${className}"`, (err) => {
+      db.run(`DELETE FROM reminders WHERE id=${ids.join(" OR id=")}`, (err) => {
         if (err) {
           reject(err);
         }
