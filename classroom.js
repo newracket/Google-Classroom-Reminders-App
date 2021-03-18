@@ -35,6 +35,7 @@ module.exports = {
               server.destroy();
               const { tokens } = await oauth2Client.getToken(qs.get("code"));
               oauth2Client.credentials = tokens; // eslint-disable-line require-atomic-updates
+              fs.writeFileSync("oauthclient.json", JSON.stringify(oauth2Client));
               resolve(oauth2Client);
             }
           } catch (e) {

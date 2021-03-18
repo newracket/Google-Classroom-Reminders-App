@@ -164,25 +164,29 @@ input.input:focus {
   flex-direction: column;
   height: 91%;
   width: 100%;
+  position: relative;
 }
 
 #innerDescriptionContainer {
   background-color: #000110;
   width: 80%;
-  min-height: 70%;
+  height: 70%;
   text-align: left;
+  overflow-y: auto;
+  position: absolute;
 }
 
 #descriptionBox {
   text-align: left;
-  width: 90%;
+  width: 100%;
+  padding-top: 65px;
 }
 
 #deleteReminder {
   background-color: #bf5949;
   color: white;
   float: right;
-  margin: 20px 50px 0px 0px;
+  margin: 20px 50px 0px 90%;
   display: block;
 }
 
@@ -201,6 +205,9 @@ input.input:focus {
 
 .reminderDateElement {
   font-size: 12px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .deleteReminderCheckbox:checked+.reminderContentElement::after {
@@ -226,7 +233,16 @@ input.input:focus {
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  width: 100%;
+  width: 80%;
+  display: inline-block;
+}
+
+.reminderEditButton {
+  background-color: #004614;
+  margin: 0px;
+  color: inherit;
+  position: absolute;
+  right: 50px;
   display: inline-block;
 }
 
@@ -248,7 +264,7 @@ input.input:focus {
 #classesContainer {
   display: flex;
   flex-flow: row wrap;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: flex-start;
 }
 
@@ -261,6 +277,7 @@ input.input:focus {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  z-index: 1;
 }
 
 .userinfo {
@@ -281,7 +298,7 @@ input.input:focus {
 }
 
 .buttons {
-  padding-top: 100px;
+  padding-top: 10vh;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -291,9 +308,10 @@ input.input:focus {
 .navigationButtons {
   background-color: transparent;
   color: white;
-  font-size: 24px;
+  font-size: min(1.5vw, 3vh);
   font-family: inherit;
   font-weight: bold;
+  text-align: left;
 }
 
 i {
@@ -319,7 +337,6 @@ button:focus {
   font-size: 32px;
   padding-left: 20px;
   padding-top: 50px;
-  height: 9%;
   margin: 0px;
   box-sizing: border-box;
 }
@@ -428,4 +445,7 @@ p {
   color: #51a89f;
   font-weight: bold;
   font-size: 15px;
+  width: 100%;
+  display: inline-block;
+  white-space: nowrap;
 }
