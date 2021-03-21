@@ -1,7 +1,6 @@
 const db = require("./databaseModules");
 const notifier = require("node-notifier");
 const flatpickr = require("flatpickr");
-const fs = require("fs");
 const flow = require("./flow");
 const authFlow = new flow.AuthFlow();
 
@@ -168,7 +167,8 @@ function showActiveReminders() {
     descriptionBoxElement.removeChild(descriptionBoxElement.firstChild);
   }
 
-  const classworkJSON = JSON.parse(fs.readFileSync("coursework.json"));
+  const classworkJSON = authFlow.courseWorkJson();
+  
   db.getReminders()
     .then(rows => {
       rows.forEach((row, i) => {

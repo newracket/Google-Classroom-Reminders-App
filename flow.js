@@ -1,6 +1,7 @@
 const AppAuth = require("@openid/appauth/built");
 const NodeSupport = require("@openid/appauth/built/node_support/");
 const fs = require("fs");
+const path = require("path");
 
 const requestor = new NodeSupport.NodeRequestor();
 /* an example open id connect provider */
@@ -91,7 +92,7 @@ exports.AuthFlow = class AuthFlow {
             .then(function (response) {
                 _this.refreshToken = response.refreshToken;
                 _this.accessTokenResponse = response;
-                fs.writeFileSync("oauthclient.json", JSON.stringify({ "refreshToken": response.refreshToken }));
+                fs.writeFileSync(path.join(__dirname, "oauthclient.json"), JSON.stringify({ "refreshToken": response.refreshToken }));
 
                 return response;
             })
@@ -208,7 +209,7 @@ exports.AuthFlow = class AuthFlow {
     processData = function () {
         return new Promise(async (resolve, reject) => {
             const _this = this;
-            const savedOauth = JSON.parse(fs.readFileSync("oauthclient.json"));
+            const savedOauth = JSON.parse(fs.readFileSync(path.join(__dirname, "oauthclient.json")));
 
             if (!this.refreshToken && savedOauth.refreshToken != undefined) {
                 this.refreshToken = savedOauth.refreshToken;
@@ -253,20 +254,20 @@ exports.AuthFlow = class AuthFlow {
                         return new Date(e.dueDate.year, e.dueDate.month - 1, e.dueDate.day, e.dueTime.hours - 7, e.dueTime.minutes) > Date.now();
                     });
 
-                    fs.writeFileSync("coursework.json", JSON.stringify(allDueCourseWork));
+                    fs.writeFileSync(path.join(__dirname, "coursework.json"), JSON.stringify(allDueCourseWork));
                     resolve();
                 });
 
-                fs.writeFileSync("currentcourses.json", JSON.stringify(courses));
-                fs.writeFileSync("userinfo.json", JSON.stringify(userInfo));
+                fs.writeFileSync(path.join(__dirname, "currentcourses.json"), JSON.stringify(courses));
+                fs.writeFileSync(path.join(__dirname, "userinfo.json"), JSON.stringify(userInfo));
             });
         })
     }
 
     showWork = function () {
-        const coursework = JSON.parse(fs.readFileSync("./coursework.json"));
-        const classes = JSON.parse(fs.readFileSync("./currentcourses.json"));
-        const userinfo = JSON.parse(fs.readFileSync("./userinfo.json"));
+        const coursework = JSON.parse(fs.readFileSync(path.join(__dirname, "./coursework.json")));
+        const classes = JSON.parse(fs.readFileSync(path.join(__dirname, "./currentcourses.json")));
+        const userinfo = JSON.parse(fs.readFileSync(path.join(__dirname, "./userinfo.json")));
         const output = [];
 
         coursework.forEach(work => {
@@ -275,5 +276,9 @@ exports.AuthFlow = class AuthFlow {
         });
 
         return { 'userinfo': userinfo, 'classwork': output };
+    }
+
+    courseWorkJson = function () {
+        return JSON.parse(fs.readFileSync(path.join(__dirname, "coursework.json")));
     }
 }
