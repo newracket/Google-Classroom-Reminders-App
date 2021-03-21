@@ -1,8 +1,9 @@
-const classroom = require("./classroom");
 const db = require("./databaseModules");
 const notifier = require("node-notifier");
 const flatpickr = require("flatpickr");
 const fs = require("fs");
+const flow = require("./flow");
+const authFlow = new flow.AuthFlow();
 
 const monthDictionary = { "January": "Jan", "February": "Feb", "March": "Mar", "April": "Apr", "May": "May", "June": "Jun", "July": "Jul", "August": "Aug", "September": "Sep", "October": "Oct", "November": "Nov", "December": "Dec" }
 const dayDictionary = { "Sunday": "Sun", "Monday": "Mon", "Tuesday": "Tue", "Wednesday": "Wed", "Thursday": "Thu", "Friday": "Fri", "Saturday": "Sat" }
@@ -21,16 +22,6 @@ const reminderTimeFpicker = flatpickr("#reminderTime", {
   time_24hr: false
 });
 
-const scopes = ['https://www.googleapis.com/auth/classroom.courses.readonly',
-  'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
-  'https://www.googleapis.com/auth/classroom.rosters.readonly',
-  'https://www.googleapis.com/auth/classroom.profile.emails',
-  'https://www.googleapis.com/auth/classroom.profile.photos'];
-// classroom.authenticate(scopes)
-//   .then(client => classroom.runSample(client)
-//     .then(updateClasswork))
-//   .catch(console.error);
-
 Element.prototype.appendChildren = function (...children) {
   children.forEach(child => {
     this.appendChild(child);
@@ -39,10 +30,11 @@ Element.prototype.appendChildren = function (...children) {
   return this;
 }
 
-// classroom.authenticateSaved()
-//   .then(client => classroom.runSample(client)
-//     .then(updateClasswork))
-//   .catch(console.error);
+db.initialize()
+  .catch(console.log);
+
+loop();
+setInterval(loop, 300000);
 
 document.getElementById("saveReminder").addEventListener("click", () => {
   const reminderName = document.getElementById("reminderName").innerText;
@@ -68,11 +60,8 @@ document.getElementById("saveReminder").addEventListener("click", () => {
   }
 });
 
-db.initialize()
-  .catch(console.log);
-
 document.getElementById("reminders").addEventListener("click", showActiveReminders);
-document.getElementById("classroom").addEventListener("click", updateClasswork);
+document.getElementById("classroom").addEventListener("click", () => { switchScreen("Google Classroom"); });
 document.getElementById("deleteReminder").addEventListener("click", function () {
   const remindersToDelete = [...document.querySelectorAll(".deleteReminderCheckbox")].filter(checkbox => checkbox.checked);
 
@@ -81,18 +70,29 @@ document.getElementById("deleteReminder").addEventListener("click", function () 
     .catch(console.log);
 });
 
-updateClasswork();
+function switchScreen(newScreen) {
+  document.getElementsByClassName("title")[0].innerText = newScreen;
+  document.getElementById("classesContainer").style.display = "none";
+  document.getElementById("reminderContainer").style.display = "none";
+  document.getElementById("descriptionContainer").style.display = "none";
+
+  if (newScreen == "Google Classroom") {
+    document.getElementById("classesContainer").style.display = "";
+  }
+  else if (newScreen == "Active Reminders") {
+    document.getElementById("descriptionContainer").style.display = "";
+  }
+  else if (newScreen == "Edit Reminder") {
+    document.getElementById("reminderContainer").style.display = "";
+  }
+}
 
 function updateClasswork() {
-  const classworkJSON = classroom.showWork();
+  const classworkJSON = authFlow.showWork();
   const classesContainer = document.getElementById("classesContainer");
   while (classesContainer.firstChild) {
     classesContainer.removeChild(classesContainer.firstChild);
   }
-  document.getElementsByClassName("title")[0].innerText = "Google Classroom";
-  document.getElementById("classesContainer").style.display = "flex";
-  document.getElementById("reminderContainer").style.display = "none";
-  document.getElementById("descriptionContainer").style.display = "none";
 
   document.getElementById("userpicture").src = `https:${classworkJSON.userinfo.photoUrl}`;
   document.getElementById("username").innerText = classworkJSON.userinfo.name.fullName;
@@ -121,7 +121,7 @@ function updateClasswork() {
     const allAssignmentsElement = createElement("div", "allAssignmentsItem");
 
     classWork.forEach(assignment => {
-      const dueDate = formatDate(new Date(assignment.dueDate.year, assignment.dueDate.month - 1, assignment.dueDate.day, assignment.dueTime.hours - 8, assignment.dueTime.minutes));
+      const dueDate = formatDate(new Date(assignment.dueDate.year, assignment.dueDate.month - 1, assignment.dueDate.day, assignment.dueTime.hours - 7, assignment.dueTime.minutes));
       const assignmentElement = createElement("div", "assignmentItem", undefined, undefined, { "data-title": assignment.title, "data-description": assignment.description, "data-class": assignment.class.name, "data-duedate": dueDate });
 
       const assignmentTextElement = createElement("div", "assignmentDiv");
@@ -132,7 +132,7 @@ function updateClasswork() {
       assignmentDueDateElement.appendChild(assignmentDueDateText);
       assignmentTextElement.appendChildren(assignmentDueDateElement, assignmentLineBreak, assignmentNameElement);
 
-      assignmentElement.addEventListener("click", function () { showReminderContent(updateClasswork, this) });
+      assignmentElement.addEventListener("click", function () { showReminderContent(() => { switchScreen("Google Classroom"); }, this) });
 
       assignmentElement.appendChild(assignmentTextElement);
       allAssignmentsElement.appendChild(assignmentElement)
@@ -143,11 +143,6 @@ function updateClasswork() {
 }
 
 function showReminderContent(backfunction, element) {
-  document.getElementsByClassName("title")[0].innerText = "Active Reminders";
-  document.getElementById("classesContainer").style.display = "none";
-  document.getElementById("reminderContainer").style.display = "flex";
-  document.getElementById("descriptionContainer").style.display = "none";
-
   document.getElementById("reminderName").innerText = element.dataset.title;
   document.getElementById("reminderName").dataset.class = element.dataset.class;
   document.getElementById("reminderDueDate").innerText = element.dataset.duedate;
@@ -164,14 +159,10 @@ function showReminderContent(backfunction, element) {
   }
 
   document.getElementById("arrowleft").addEventListener("click", backfunction);
+  switchScreen("Edit Reminder");
 }
 
 function showActiveReminders() {
-  document.getElementsByClassName("title")[0].innerText = "Active Reminders";
-  document.getElementById("classesContainer").style.display = "none";
-  document.getElementById("descriptionContainer").style.display = "flex";
-  document.getElementById("reminderContainer").style.display = "none";
-
   const descriptionBoxElement = document.getElementById("descriptionBox");
   while (descriptionBoxElement.firstChild) {
     descriptionBoxElement.removeChild(descriptionBoxElement.firstChild);
@@ -211,6 +202,8 @@ function showActiveReminders() {
       });
     })
     .catch(console.log);
+
+  switchScreen("Active Reminders");
 }
 
 function formatDate(date) {
@@ -250,22 +243,25 @@ function createElement(elementName, classes, text, id, attributes) {
   return element;
 }
 
-setInterval(() => {
+function loop() {
+  authFlow.processData().then(updateClasswork);
+
   db.getReminders()
     .then(rows => {
       rows.forEach(row => {
         if (new Date(row.date) < new Date()) {
-          if (row.timesReminded % 1 == 0) {
-            notifier.notify({
-              title: `Reminder for ${row.class}`,
-              message: `Reminder to do the assignment ${row.reminder}\nDue on ${row.dueDate.toString().split(" GM")[0].toString().split(" GM")[0]}`,
-              icon: "./googleclassroomicon.png",
-              wait: true,
-              sound: true
-            });
-          }
+          notifier.notify({
+            title: `${row.class}`,
+            message: `${row.reminder}\nDue on ${row.dueDate}`,
+            icon: "./googleclassroomicon.png",
+            wait: true,
+            sound: true,
+            appID: "Google Classroom Reminders"
+          });
+
+          db.removeReminders([row.id]);
         }
       });
     })
     .catch(console.log);
-}, 300000);
+}
