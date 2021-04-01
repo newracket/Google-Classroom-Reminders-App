@@ -31,6 +31,7 @@ Element.prototype.appendChildren = function (...children) {
   return this;
 }
 
+switchScreen("Google Classroom");
 loop();
 setInterval(loop, 300000);
 
