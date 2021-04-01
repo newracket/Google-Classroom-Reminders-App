@@ -3,6 +3,8 @@ const notifier = require("node-notifier");
 const flatpickr = require("flatpickr");
 const flow = require("./flow");
 const authFlow = new flow.AuthFlow();
+const path = require("path");
+const electron = require("electron");
 
 const monthDictionary = { "January": "Jan", "February": "Feb", "March": "Mar", "April": "Apr", "May": "May", "June": "Jun", "July": "Jul", "August": "Aug", "September": "Sep", "October": "Oct", "November": "Nov", "December": "Dec" }
 const dayDictionary = { "Sunday": "Sun", "Monday": "Mon", "Tuesday": "Tue", "Wednesday": "Wed", "Thursday": "Thu", "Friday": "Fri", "Saturday": "Sat" }
@@ -29,9 +31,6 @@ Element.prototype.appendChildren = function (...children) {
   return this;
 }
 
-db.initialize()
-  .catch(console.log);
-
 loop();
 setInterval(loop, 300000);
 
@@ -46,7 +45,7 @@ document.getElementById("saveReminder").addEventListener("click", () => {
   const reminderDateTimeFormatted = new Date(reminderDate.getFullYear(), reminderDate.getMonth(), reminderDate.getDate(), reminderTime.getHours(), reminderTime.getMinutes());
 
   if (reminderId != undefined) {
-    db.removeReminders([reminderId])
+    db.removeReminders([parseInt(reminderId)])
       .then(res => db.addReminder(reminderDateTimeFormatted, reminderDueDate, reminderName, reminderClass)
         .then(res => document.getElementById("arrowleft").click())
         .catch(console.log))
@@ -64,7 +63,7 @@ document.getElementById("classroom").addEventListener("click", () => { switchScr
 document.getElementById("deleteReminder").addEventListener("click", function () {
   const remindersToDelete = [...document.querySelectorAll(".deleteReminderCheckbox")].filter(checkbox => checkbox.checked);
 
-  db.removeReminders(remindersToDelete.map(reminderToDelete => reminderToDelete.dataset.id))
+  db.removeReminders(remindersToDelete.map(reminderToDelete => parseInt(reminderToDelete.dataset.id)))
     .then(showActiveReminders)
     .catch(console.log);
 });
@@ -121,7 +120,7 @@ function updateClasswork() {
 
     classWork.forEach(assignment => {
       const dueDate = formatDate(new Date(assignment.dueDate.year, assignment.dueDate.month - 1, assignment.dueDate.day, assignment.dueTime.hours - 7, assignment.dueTime.minutes));
-      const assignmentElement = createElement("div", "assignmentItem", undefined, undefined, { "data-title": assignment.title, "data-description": assignment.description, "data-class": assignment.class.name, "data-duedate": dueDate });
+      const assignmentElement = createElement("div", "assignmentItem", undefined, undefined, { "data-title": assignment.title, "data-description": assignment.description, "data-class": assignment.class.name, "data-duedate": dueDate, "data-link": assignment.alternateLink });
 
       const assignmentTextElement = createElement("div", "assignmentDiv");
       const assignmentNameElement = createElement("span", "assignmentName", assignment.title);
@@ -143,8 +142,13 @@ function updateClasswork() {
 
 function showReminderContent(backfunction, element) {
   document.getElementById("reminderName").innerText = element.dataset.title;
+  document.getElementById("reminderName").dataset.link = element.dataset.link;
   document.getElementById("reminderName").dataset.class = element.dataset.class;
   document.getElementById("reminderDueDate").innerText = element.dataset.duedate;
+
+  document.getElementById("reminderName").addEventListener("click", function () {
+    electron.shell.openExternal(this.dataset.link);
+  });
 
   if (element.dataset.id != undefined) {
     document.getElementById("reminderName").dataset.id = element.dataset.id;
@@ -155,6 +159,15 @@ function showReminderContent(backfunction, element) {
   }
   else {
     document.getElementById("reminderDescription").innerText = "No Description.";
+  }
+
+  if (element.dataset.date != undefined) {
+    reminderDateFpicker.setDate(new Date(element.dataset.date));
+    reminderTimeFpicker.setDate(new Date(element.dataset.date));
+  }
+  else {
+    reminderDateFpicker.setDate(new Date());
+    reminderTimeFpicker.setDate(new Date());
   }
 
   document.getElementById("arrowleft").addEventListener("click", backfunction);
@@ -168,7 +181,7 @@ function showActiveReminders() {
   }
 
   const classworkJSON = authFlow.courseWorkJson();
-  
+
   db.getReminders()
     .then(rows => {
       rows.forEach((row, i) => {
@@ -180,6 +193,7 @@ function showActiveReminders() {
         const editReminderButton = createElement("button", "reminderEditButton", "EDIT");
 
         const description = classworkJSON.find(classwork => classwork.title == row.reminder) != undefined ? classworkJSON.find(classwork => classwork.title == row.reminder).description : "undefined";
+        const link = classworkJSON.find(classwork => classwork.title == row.reminder).alternateLink;
         const reminderCheckbox = createElement("input", "deleteReminderCheckbox", undefined, `${i}Checkbox`,
           {
             "type": "checkbox",
@@ -188,7 +202,8 @@ function showActiveReminders() {
             "data-duedate": row.dueDate,
             "data-description": description,
             "data-class": row.class,
-            "data-id": row.id
+            "data-id": row.id,
+            "data-link": link
           });
 
         editReminderButton.addEventListener("click", () => {
@@ -200,10 +215,10 @@ function showActiveReminders() {
         reminderElement.appendChildren(reminderCheckbox, reminderContentElement, editReminderButton);
         descriptionBoxElement.appendChild(reminderElement);
       });
+
+      switchScreen("Active Reminders");
     })
     .catch(console.log);
-
-  switchScreen("Active Reminders");
 }
 
 function formatDate(date) {
@@ -253,13 +268,15 @@ function loop() {
           notifier.notify({
             title: `${row.class}`,
             message: `${row.reminder}\nDue on ${row.dueDate}`,
-            icon: "./googleclassroomicon.png",
+            icon: path.join(__dirname, "googleclassroomicon.png"),
             wait: true,
             sound: true,
             appID: "Google Classroom Reminders"
           });
 
-          db.removeReminders([row.id]);
+          db.removeReminders([row.id])
+            .then(showActiveReminders)
+            .catch(console.log);
         }
       });
     })

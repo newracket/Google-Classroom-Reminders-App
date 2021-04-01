@@ -119,6 +119,7 @@ input.input:focus {
   overflow: hidden;
   white-space: nowrap;
   font-weight: bold;
+  cursor: pointer;
 }
 
 #reminderUnderline {

@@ -1,32 +1,57 @@
 {
-  "name": "google-classroom-reminders-app",
-  "productName": "Google Classroom Reminders App",
+  "name": "gc-reminders-app",
+  "productName": "GC Reminders App",
   "version": "1.0.0",
   "description": "An application that takes google classroom assignments and gives reminders on them. ",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "author": "GitHub",
   "license": "CC0-1.0",
   "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.54",
+    "@electron-forge/maker-deb": "^6.0.0-beta.54",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.54",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
+    "@electron-forge/maker-zip": "^6.0.0-beta.54",
     "electron": "^11.3.0",
-    "electron-packager": "^15.2.0",
     "electron-rebuild": "^2.3.5"
   },
   "dependencies": {
     "@openid/appauth": "^1.3.0",
-    "@vue/cli": "^4.5.11",
     "electron-reload": "^1.5.0",
+    "electron-squirrel-startup": "^1.0.0",
     "flatpickr": "^4.6.9",
-    "google-auth-library": "^6.1.6",
-    "googleapis": "^67.0.0",
-    "growl": "^1.10.5",
-    "node-notifier": "^9.0.0",
-    "open": "^7.4.0",
-    "powertoast": "^1.2.3",
-    "server-destroy": "^1.0.1",
-    "sqlite3": "^5.0.2",
-    "windows10-electron-vibrancy": "^1.0.1"
+    "node-notifier": "^9.0.0"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "gc_reminders_app"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
   }
 }

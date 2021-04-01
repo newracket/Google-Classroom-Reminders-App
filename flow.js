@@ -15,7 +15,7 @@ const scopes = ['https://www.googleapis.com/auth/classroom.courses.readonly',
     'https://www.googleapis.com/auth/classroom.profile.emails',
     'https://www.googleapis.com/auth/classroom.profile.photos'];
 
-exports.AuthFlow = class AuthFlow {
+module.exports.AuthFlow = class AuthFlow {
     constructor() {
         const _this = this;
         this.notifier = new AppAuth.AuthorizationNotifier();
@@ -265,9 +265,9 @@ exports.AuthFlow = class AuthFlow {
     }
 
     showWork = function () {
-        const coursework = JSON.parse(fs.readFileSync(path.join(__dirname, "./coursework.json")));
-        const classes = JSON.parse(fs.readFileSync(path.join(__dirname, "./currentcourses.json")));
-        const userinfo = JSON.parse(fs.readFileSync(path.join(__dirname, "./userinfo.json")));
+        const coursework = JSON.parse(fs.readFileSync(path.join(__dirname, "coursework.json")));
+        const classes = JSON.parse(fs.readFileSync(path.join(__dirname, "currentcourses.json")));
+        const userinfo = JSON.parse(fs.readFileSync(path.join(__dirname, "userinfo.json")));
         const output = [];
 
         coursework.forEach(work => {

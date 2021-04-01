@@ -1,5 +1,6 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, screen } = require('electron')
+const { app, BrowserWindow, screen } = require('electron');
+const path = require("path");
 
 // require('electron-reload')(__dirname);
 
@@ -11,6 +12,7 @@ function createWindow() {
     height: height,
     minWidth: 800,
     minHeight: 600,
+    icon: path.join(__dirname, "googleclassroomicon.png"),
     webPreferences: {
       nodeIntegration: true
     }

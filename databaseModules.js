@@ -1,63 +1,49 @@
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('reminders.db');
+const fs = require("fs");
+const path = require("path");
 
 module.exports = {
   name: "databaseModule",
-  initialize() {
-    return new Promise((resolve, reject) => {
-      db.run(`CREATE TABLE IF NOT EXISTS reminders (
-        id INT,
-        date TEXT,
-        dueDate TEXT,
-        reminder TEXT,
-        class TEXT,
-        timesReminded INT DEFAULT 0
-      );`);
-    });
-  },
   addReminder(date, dueDate, content, className) {
     return new Promise((resolve, reject) => {
-      db.all(`SELECT * FROM reminders ORDER BY id DESC LIMIT 1`, [], (err, rows) => {
+      fs.readFile(path.join(__dirname, "reminders.json"), "utf8", (err, data) => {
         if (err) {
-          reject(err);
+          return reject(err);
         }
-
-        if (rows.length == 0) {
-          rows.push({ id: 0 });
-        }
-
-        db.run(`INSERT INTO reminders (id, date, dueDate, reminder, class) VALUES (${rows[0].id + 1}, "${date}", "${dueDate}", "${content.replace(/"/g, "'")}", "${className.replace(/"/g, "'")}")`, (err) => {
+        data = JSON.parse(data);
+        data.push({ "id": data.length > 0 ? data.slice(-1)[0].id + 1 : 0, "date": date, "dueDate": dueDate, "reminder": content, "class": className });
+        fs.writeFile(path.join(__dirname, "reminders.json"), JSON.stringify(data), (err) => {
           if (err) {
-            reject(err);
+            return reject(err);
           }
-          else {
-            resolve();
-          }
-        });
+          return resolve(err);
+        })
       });
     });
   },
   getReminders() {
     return new Promise((resolve, reject) => {
-      db.all(`SELECT * FROM reminders`, [], (err, rows) => {
+      fs.readFile(path.join(__dirname, "reminders.json"), "utf8", (err, data) => {
         if (err) {
-          reject(err);
+          return reject(err);
         }
-        else {
-          resolve(rows);
-        }
+        return resolve(JSON.parse(data));
       });
     });
   },
   removeReminders(ids) {
     return new Promise((resolve, reject) => {
-      db.run(`DELETE FROM reminders WHERE id=${ids.join(" OR id=")}`, (err) => {
+      fs.readFile(path.join(__dirname, "reminders.json"), "utf8", (err, data) => {
         if (err) {
-          reject(err);
+          return reject(err);
         }
-        else {
-          resolve(err);
-        }
+        data = JSON.parse(data);
+        data = data.filter(reminder => !ids.includes(reminder.id));
+        fs.writeFile(path.join(__dirname, "reminders.json"), JSON.stringify(data), (err) => {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(data);
+        })
       });
     });
   }
