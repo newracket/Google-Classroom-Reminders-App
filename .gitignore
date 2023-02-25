@@ -1,2 +1,4 @@
 node_modules
 GC Reminders App-win32-x64
+.idea
+oauthclient.json
