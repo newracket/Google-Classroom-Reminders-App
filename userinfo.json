@@ -1,1 +1,7 @@
-{"id":"114012597120619909321","name":{"givenName":"Aniket","familyName":"Gupta","fullName":"Aniket Gupta"},"emailAddress":"a36224@student.ghctk12.com","photoUrl":"//lh3.googleusercontent.com/-CJygt9I4oeE/AAAAAAAAAAI/AAAAAAAAAEA/HSyU7eXskZI/photo.jpg"}
+{
+  "id": "0",
+  "name": { "givenName": "First", "familyName": "Last", "fullName": "Name" },
+  "emailAddress": "Email",
+  "photoUrl": "//lh3.googleusercontent.com/a/AGNmyxaG9xYUjvo9FcTk53_FcVGcpTzcKgQxBdfe215opg",
+  "permissions": [{ "permission": "CREATE_COURSE" }]
+}

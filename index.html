@@ -1,80 +1,81 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';" />
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+    <link rel="stylesheet" href="./index.css" />
+    <title>Google Classroom Reminders</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-  <meta http-equiv="Content-Security-Policy"
-    content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';">
-  <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <link rel="stylesheet" href="./index.css">
-  <title>Google Classroom Reminders</title>
-</head>
-
-<body>
-  <div class="background-image"></div>
-  <div class="container">
-    <div id="leftSideBar">
-      <div class="userinfo">
-        <img src="" id="userpicture" />
-        <h2 id="username"></h2>
-      </div>
-      <div class="buttons">
-        <div class="topButtons">
-          <button class="navigationButtons" id="classroom"><i class="fas fa-home fa-1x"></i>Classroom</button>
-          <button class="navigationButtons" id="reminders"><i class="far fa-bell fa-1x"></i>Active Reminders</button>
-          <button class="navigationButtons" id="calendar"><i class="far fa-calendar-alt fa-1x"></i>Calendar</button>
+  <body>
+    <div class="background-image"></div>
+    <div class="container">
+      <div id="leftSideBar">
+        <div class="userinfo">
+          <img src="" id="userpicture" />
+          <h2 id="username"></h2>
         </div>
-        <div class="bottomButtons">
-          <button class="navigationButtons" id="settings"><i class="fas fa-cogs fa-1x"></i>Settings</button>
-          <button class="navigationButtons" id="signout"><i class="fas fa-sign-out-alt fa-flip-horizontal"></i></button>
-        </div>
-      </div>
-    </div>
-
-    <div id="rightSideContainer">
-      <h1 class="title">Google Classroom</h1>
-      <div id="classesContainer"></div>
-      <div id="descriptionContainer">
-        <div id="innerDescriptionContainer">
-          <button id="deleteReminder">DELETE</button>
-          <div id="descriptionBox"></div>
+        <div class="buttons">
+          <div class="topButtons">
+            <button class="navigationButtons" id="classroom"><i class="fas fa-home fa-1x"></i>Classroom</button>
+            <button class="navigationButtons" id="reminders"><i class="far fa-bell fa-1x"></i>Active Reminders</button>
+            <button class="navigationButtons" id="calendar"><i class="far fa-calendar-alt fa-1x"></i>Calendar</button>
+          </div>
+          <div class="bottomButtons">
+            <button class="navigationButtons" id="settings"><i class="fas fa-cogs fa-1x"></i>Settings</button>
+            <button class="navigationButtons" id="signout">
+              <i class="fas fa-sign-out-alt fa-flip-horizontal"></i>
+            </button>
+          </div>
         </div>
       </div>
-      <div id="reminderContainer">
-        <div id="innerReminderContainer">
-          <div id="reminderBox">
-            <div id="reminderNameBox">
-              <span id="arrowleft" style="padding: 7px; margin-right: 10px;">
-                <i class="fas fa-arrow-left fa-2x" style="margin-right: 0px !important;"></i>
-              </span>
-              <div id="reminderNameHr">
-                <div id="reminderName"></div>
-                <hr id="reminderUnderline">
-                <div id="reminderDueDate"></div>
+
+      <div id="rightSideContainer">
+        <h1 class="title">Google Classroom</h1>
+        <div id="classesContainer"></div>
+        <div id="descriptionContainer">
+          <div id="innerDescriptionContainer">
+            <button id="deleteReminder">DELETE</button>
+            <div id="descriptionBox"></div>
+          </div>
+        </div>
+        <div id="reminderContainer">
+          <div id="innerReminderContainer">
+            <div id="reminderBox">
+              <div id="reminderNameBox">
+                <span id="arrowleft" style="padding: 7px; margin-right: 10px">
+                  <i class="fas fa-arrow-left fa-2x" style="margin-right: 0px !important"></i>
+                </span>
+                <div id="reminderNameHr">
+                  <div id="reminderName"></div>
+                  <hr id="reminderUnderline" />
+                  <div id="reminderDueDate"></div>
+                </div>
               </div>
-            </div>
 
-            <div id="reminderDateBox">
-              <i class="far fa-clock fa-2x"></i>
-              <input id="reminderDate" />
-              <input id="reminderTime" />
-            </div>
+              <div id="reminderDateBox">
+                <i class="far fa-clock fa-2x"></i>
+                <input id="reminderDate" />
+                <input id="reminderTime" />
+              </div>
 
-            <div id="reminderDescriptionBox">
-              <i class="fas fa-bars fa-2x" style="margin-top: 10px;"></i>
-              <div id="reminderDescription"></div>
-            </div>
+              <div id="reminderDescriptionBox">
+                <i class="fas fa-bars fa-2x" style="margin-top: 10px"></i>
+                <div id="reminderDescription"></div>
+              </div>
 
-            <button id="saveReminder">Save</button>
+              <button id="saveReminder">Save</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <script src="./renderer.js"></script>
-</body>
-
+    <script src="./renderer.js"></script>
+  </body>
 </html>
